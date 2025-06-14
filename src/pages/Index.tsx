@@ -473,8 +473,8 @@ const Index = () => {
             </CardHeader>
             <CardContent className="p-4 space-y-3">
               <div className="space-y-3">
-                <Card className="border-2 border-slate-200">
-                  <CardContent className="p-3 space-y-3">
+                {/* <Card className="border-2 border-slate-200"> */}
+                  <CardContent className="p-0 space-y-3">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                       <div>
                         <Label>Grade Type</Label>
@@ -563,7 +563,7 @@ const Index = () => {
                       </div>
                     </div>
                   </CardContent>
-                </Card>
+                {/* </Card> */}
                 <Button
                   onClick={addCurrentItem}
                   className="w-full bg-blue-600 hover:bg-blue-700"

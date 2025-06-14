@@ -48,7 +48,7 @@ const CertificatePreview = ({ data }) => {
               <div className="grid grid-cols-2">
                 <div className="space-y-1">
                   <div className="text-l">T.C NO : {data.tcNumber || 'N/A'}</div>
-                  <div className="text-l">Invoice NO : {data.invoiceNo || 'N/A'}</div>
+                  <div className="text-l">Invoice No : {data.invoiceNo || 'N/A'}</div>
                   <div className="text-l">Po : {data.purchaseOrder}</div>
                 </div>
                 <div className="space-y-1 text-right">
