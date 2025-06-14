@@ -89,7 +89,7 @@ const Index = () => {
     "SGACC",
     "Adamite",
     "Alloys",
-    "SG",
+    "SGI",
     "EN-8",
     "EN-9",
     "EN-42",
