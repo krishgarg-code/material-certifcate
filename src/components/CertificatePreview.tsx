@@ -30,15 +30,15 @@ const CertificatePreview = ({ data }) => {
             {/* Company/Party */}
             <div className="grid  text-xs gap-10 mb-8 ">
               <div className='-mt-2'>
-                <p className="font-semibold">• COMPANY NAME - CS CASTINGS PVT. LTD.</p>
-                <p className="font-semibold">• ADDRESS- OPP POWER GRID NEAR VILLAGE KHUMBH , AMLOH ROAD , MANDI GOBINDGARH </p>
+                <p className="font-semibold"> • CS CASTINGS PVT. LTD.</p>
+                <p className="font-semibold"> • OPPO POWER GRID, NEAR VILLAGE KHUMBH , AMLOH ROAD , MANDI GOBINDGARH </p>
               </div>
               <div  >
              <hr style={{ width: '106%',marginLeft:'-17px', marginTop: '-30px',marginBottom:'10px', height: '2px', backgroundColor: 'black', border: 'none' }} />
 
 
               <br />
-                <p >• Party NAME - {data.partyName}</p>
+                <p >• PARTY NAME - {data.partyName}</p>
                 <p >• ADDRESS- {data.partyAddress}</p>
               </div>
             </div>
@@ -103,7 +103,7 @@ const CertificatePreview = ({ data }) => {
               <thead>
                 <tr>
                   {["ROLL No", "C", "SI", "MN", "S", "P", "CR", "NI", "MO", "V", "MG", "CU", "TI"].map((head, i) => (
-                    <th key={i} className="border border-black py-1">{head}</th>
+                    <th key={i} className="border border-black py-4 -pt-5">{head}</th>
                   ))}
                 </tr>
               </thead>
