@@ -1,4 +1,3 @@
-
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 
@@ -9,17 +8,54 @@ export const generatePDF = async (formData) => {
       throw new Error('Certificate preview element not found');
     }
 
-    // Configure html2canvas for better quality
+    // Configure html2canvas for better quality and image handling
     const canvas = await html2canvas(element, {
       scale: 2, // Higher scale for better quality
       useCORS: true,
       allowTaint: true,
       backgroundColor: '#ffffff',
       width: element.scrollWidth,
-      height: element.scrollHeight
+      height: element.scrollHeight,
+      logging: true,
+      imageTimeout: 0,
+      onclone: (clonedDoc) => {
+        // Ensure all images in the cloned document are loaded
+        const images = clonedDoc.getElementsByTagName('img');
+        return new Promise((resolve) => {
+          let loadedImages = 0;
+          const totalImages = images.length;
+          
+          if (totalImages === 0) {
+            resolve();
+            return;
+          }
+
+          Array.from(images).forEach((img) => {
+            if (img.complete) {
+              loadedImages++;
+              if (loadedImages === totalImages) {
+                resolve();
+              }
+            } else {
+              img.onload = () => {
+                loadedImages++;
+                if (loadedImages === totalImages) {
+                  resolve();
+                }
+              };
+              img.onerror = () => {
+                loadedImages++;
+                if (loadedImages === totalImages) {
+                  resolve();
+                }
+              };
+            }
+          });
+        });
+      }
     });
 
-    const imgData = canvas.toDataURL('image/png');
+    const imgData = canvas.toDataURL('image/png', 1.0);
     
     // Create PDF with A4 dimensions
     const pdf = new jsPDF('p', 'mm', 'a4');

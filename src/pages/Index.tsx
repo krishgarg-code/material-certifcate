@@ -42,12 +42,12 @@ const Index = () => {
   const inputRefs = useRef([]);
 
   const generateTCNumber = () => {
-    const date = new Date();
-    const day = String(date.getDate()).padStart(2, '0');
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const year = String(date.getFullYear()).slice(-2);
-    return `CSCPL/${day}-${month}/${year}`;
+    const now = new Date();
+    const datePart = now.toISOString().slice(2, 10).replace(/-/g, ''); // e.g., "240614"
+    const randomDigits = Math.floor(100 + Math.random() * 900); // 3 random digits
+    return `CSC${datePart}${randomDigits}`;
   };
+  
 
   const [formData, setFormData] = useState({
     date: new Date(),
@@ -59,6 +59,15 @@ const Index = () => {
     tcNumber: generateTCNumber(),
     items: []
   });
+
+  // Ensure TC number is generated on component mount
+  useEffect(() => {
+    setFormData(prev => ({
+      ...prev,
+      tcNumber: generateTCNumber()
+    }));
+  }, []);
+  
 
   const [currentItem, setCurrentItem] = useState<Item>({
     material: '',
