@@ -11,7 +11,7 @@ import roll from './roll.png';
 const CertificatePreview = ({ data }) => {
   // Add function to format decimal values
   const formatDecimal = (value) => {
-    if (!value) return '';
+    if (!value) return '-';
     // If the value starts with a decimal point, add a leading zero
     if (value.startsWith('.')) {
       return `0${value}`;
