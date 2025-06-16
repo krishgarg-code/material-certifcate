@@ -33,8 +33,8 @@ const CertificatePreview = ({ data }) => {
               <div className="w-20 h-20 flex items-center justify-center">
                 <img src={logo} alt="Company Logo" className="max-w-full max-h-full object-contain" />
               </div>
-              <h1 className="text-2xl font-bold text-center  ml-20 -mt-4">Composition </h1>
-              <h1 className="text-2xl font-bold  flex-1 ml-5  -mt-4 ">Certificate</h1>
+              <h1 className="text-2xl font-bold text-center  ml-20 -mt-4">COMPOSITION </h1>
+              <h1 className="text-2xl font-bold  flex-1 ml-5  -mt-4 ">CERTIFICATION</h1>
             </div>
 
             {/* Company/Party */}
