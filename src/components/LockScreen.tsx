@@ -116,7 +116,9 @@ const LockScreen = () => {
           </form>
         </div>
       </motion.div>
-    </div>
+    </div>  
+
+    
   );
 };
 

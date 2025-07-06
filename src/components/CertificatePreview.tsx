@@ -65,7 +65,15 @@ const CertificatePreview = ({ data }) => {
                 <div className="space-y-1 text-right">
                   <div className="text-l">Date : {format(data.date, 'dd/MM/yy')}</div>
                   <div className="text-l">Date : {format(data.date, 'dd/MM/yy')}</div>
-                  <div className="text-l">Date : {format(data.poDate, 'dd/MM/yy')}</div>
+                  <div className="text-l text-right">
+                    Date: {Array.isArray(data.poDates) && data.poDates.length > 0
+                      ? data.poDates.map((d, i) => (
+                          <span key={i} className="inline-block">
+                            {format(d, 'dd/MM/yy')}{i < data.poDates.length - 1 ? ', ' : ''}
+                          </span>
+                        ))
+                      : '-'}
+                  </div>
                 </div>
               </div>
             </div>

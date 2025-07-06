@@ -51,7 +51,7 @@ const Index = () => {
 
   const [formData, setFormData] = useState({
     date: new Date(),
-    poDate: new Date(),
+    poDates: [new Date()],
     partyName: '',
     partyAddress: '',
     purchaseOrder: '',
@@ -92,6 +92,7 @@ const Index = () => {
   });
 
   const [showPreview, setShowPreview] = useState(false);
+  const [editIndex, setEditIndex] = useState(null);
 
   const materialOptions = [
     "WSG",
@@ -112,6 +113,28 @@ const Index = () => {
       ...prev,
       [field]: value
     }));
+  };
+
+  const handlePoDateChange = (index, date) => {
+    setFormData(prev => {
+      const newPoDates = [...prev.poDates];
+      newPoDates[index] = date;
+      return { ...prev, poDates: newPoDates };
+    });
+  };
+
+  const addPoDate = () => {
+    setFormData(prev => ({
+      ...prev,
+      poDates: [...prev.poDates, new Date()]
+    }));
+  };
+
+  const removePoDate = (index) => {
+    setFormData(prev => {
+      const newPoDates = prev.poDates.filter((_, i) => i !== index);
+      return { ...prev, poDates: newPoDates };
+    });
   };
 
   const handleCurrentItemChange = (field, value) => {
@@ -166,15 +189,28 @@ const Index = () => {
       return;
     }
 
-    setFormData(prev => ({
-      ...prev,
-      items: [...prev.items, { ...currentItem }]
-    }));
+    setFormData(prev => {
+      let newItems;
+      if (editIndex !== null) {
+        // Update in place
+        newItems = prev.items.map((item, idx) =>
+          idx === editIndex ? { ...currentItem } : item
+        );
+      } else {
+        // Add new
+        newItems = [...prev.items, { ...currentItem }];
+      }
+      return {
+        ...prev,
+        items: newItems
+      };
+    });
 
+    setEditIndex(null); // Reset edit index
     resetCurrentItem();
     toast({ 
       title: "Success", 
-      description: "Item added successfully!",
+      description: editIndex !== null ? "Item updated successfully!" : "Item added successfully!",
       duration: 2000
     });
   };
@@ -192,9 +228,8 @@ const Index = () => {
   };
 
   const editItem = (itemIndex) => {
-    const itemToEdit = formData.items[itemIndex];
-    setCurrentItem({ ...itemToEdit });
-    removeItem(itemIndex);
+    setCurrentItem({ ...formData.items[itemIndex] });
+    setEditIndex(itemIndex);
     toast({ 
       title: "Info", 
       description: "Item loaded for editing",
@@ -258,7 +293,7 @@ const Index = () => {
   const resetForm = () => {
     setFormData({
       date: new Date(),
-      poDate: new Date(),
+      poDates: [new Date()],
       partyName: '',
       partyAddress: '',
       purchaseOrder: '',
@@ -405,50 +440,69 @@ const Index = () => {
                   onKeyDown={(e) => handleKeyDown(e, 3)}
                 />
               </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <Label htmlFor="poDate">PO Date</Label>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        className="w-full justify-start text-left font-normal"
-                      >
-                        <CalendarIcon className="mr-2 h-4 w-4" />
-                        {formData.poDate ? format(formData.poDate, "PPP") : "Pick a date"}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0">
-                      <Calendar
-                        mode="single"
-                        selected={formData.poDate}
-                        onSelect={(date) => handleInputChange('poDate', date)}
-                        initialFocus
-                      />
-                    </PopoverContent>
-                  </Popover>
+              <div className="mb-3">
+                <Label htmlFor="date">Date</Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className="w-full justify-start text-left font-normal"
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {formData.date ? format(formData.date, "PPP") : "Pick a date"}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0">
+                    <Calendar
+                      mode="single"
+                      selected={formData.date}
+                      onSelect={(date) => handleInputChange('date', date)}
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+              <div>
+                <div className="flex items-center mb-1">
+                  <Label htmlFor="poDate" className="mb-0">PO Date</Label>
+                  <Button type="button" size="icon" variant="ghost" className="ml-2 p-1" onClick={addPoDate}>
+                    <Plus className="h-4 w-4" />
+                  </Button>
                 </div>
-                <div>
-                  <Label htmlFor="date">Date</Label>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        className="w-full justify-start text-left font-normal"
-                      >
-                        <CalendarIcon className="mr-2 h-4 w-4" />
-                        {formData.date ? format(formData.date, "PPP") : "Pick a date"}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0">
-                      <Calendar
-                        mode="single"
-                        selected={formData.date}
-                        onSelect={(date) => handleInputChange('date', date)}
-                        initialFocus
-                      />
-                    </PopoverContent>
-                  </Popover>
+                <div className="flex flex-col gap-2 min-h-[88px] max-h-[88px] overflow-y-auto border rounded-md p-2 bg-slate-50">
+                  {formData.poDates.map((date, idx) => (
+                    <div key={idx} className="flex items-center gap-2">
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button
+                            variant="outline"
+                            className="w-full justify-start text-left font-normal"
+                          >
+                            <CalendarIcon className="mr-2 h-4 w-4" />
+                            {date ? format(date, "PPP") : "Pick a date"}
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0">
+                          <Calendar
+                            mode="single"
+                            selected={date}
+                            onSelect={(d) => handlePoDateChange(idx, d)}
+                            initialFocus
+                          />
+                        </PopoverContent>
+                      </Popover>
+                      {formData.poDates.length > 1 && (
+                        <Button type="button" size="icon" variant="ghost" className="p-1" onClick={() => removePoDate(idx)}>
+                          <Trash2 className="h-4 w-4 text-red-500" />
+                        </Button>
+                      )}
+                    </div>
+                  ))}
+                  {formData.poDates.length === 1 && (
+                    <div className="flex-1 flex items-center justify-center text-xs text-slate-400 h-10 select-none">
+                      Press + icon to add more po dates
+                    </div>
+                  )}
                 </div>
               </div>
               <div>
@@ -589,41 +643,47 @@ const Index = () => {
                 {formData.items.length > 0 ? (
                   <div className="h-[calc(100vh-350px)] overflow-y-auto pr-2">
                     <div className="space-y-2">
-                      {formData.items.map((item, index) => (
-                        <Card key={index} className="bg-slate-50">
-                          <CardContent className="p-2">
-                            <div className="flex justify-between items-start">
-                              <div>
-                                <div className="text-sm font-medium text-slate-600 mb-1">Item {index + 1}</div>
-                                <div className="text-xs space-y-0.5 text-slate-500">
-                                  <div>Material: {item.material}</div>
-                                  <div>Roll Number: {item.rollNo}</div>
-                                  <div>Hardness: {item.hardness}</div>
-                                  <div>Color: {item.color}</div>
+                      {formData.items
+                        .filter((_, index) => editIndex === null || index !== editIndex)
+                        .map((item, index) => {
+                          // Compute the original index for edit/remove actions
+                          const originalIndex = formData.items.findIndex((itm, idx) => itm === item && (editIndex === null || idx !== editIndex));
+                          return (
+                            <Card key={originalIndex} className="bg-slate-50">
+                              <CardContent className="p-2">
+                                <div className="flex justify-between items-start">
+                                  <div>
+                                    <div className="text-sm font-medium text-slate-600 mb-1">Item {originalIndex + 1}</div>
+                                    <div className="text-xs space-y-0.5 text-slate-500">
+                                      <div>Material: {item.material}</div>
+                                      <div>Roll Number: {item.rollNo}</div>
+                                      <div>Hardness: {item.hardness}</div>
+                                      <div>Color: {item.color}</div>
+                                    </div>
+                                  </div>
+                                  <div className="flex gap-1">
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      className="h-6 px-2 text-blue-500 hover:text-blue-600 hover:bg-blue-50"
+                                      onClick={() => editItem(originalIndex)}
+                                    >
+                                      <Edit className="h-3 w-3" />
+                                    </Button>
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      className="h-6 px-2 text-red-500 hover:text-red-600 hover:bg-red-50"
+                                      onClick={() => removeItem(originalIndex)}
+                                    >
+                                      <Trash2 className="h-3 w-3" />
+                                    </Button>
+                                  </div>
                                 </div>
-                              </div>
-                              <div className="flex gap-1">
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  className="h-6 px-2 text-blue-500 hover:text-blue-600 hover:bg-blue-50"
-                                  onClick={() => editItem(index)}
-                                >
-                                  <Edit className="h-3 w-3" />
-                                </Button>
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  className="h-6 px-2 text-red-500 hover:text-red-600 hover:bg-red-50"
-                                  onClick={() => removeItem(index)}
-                                >
-                                  <Trash2 className="h-3 w-3" />
-                                </Button>
-                              </div>
-                            </div>
-                          </CardContent>
-                        </Card>
-                      ))}
+                              </CardContent>
+                            </Card>
+                          );
+                        })}
                     </div>
                   </div>
                 ) : (
