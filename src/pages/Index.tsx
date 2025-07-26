@@ -22,6 +22,8 @@ interface Item {
   rollSize: string;
   hardness: string;
   color: string;
+  type: string;
+  pieces: number;
   chemicalProperties: {
     C: string;
     MN: string;
@@ -75,6 +77,8 @@ const Index = () => {
     rollSize: '',
     hardness: '',
     color: '',
+    type: '',
+    pieces: 1,
     chemicalProperties: {
       C: '',
       MN: '',
@@ -161,6 +165,8 @@ const Index = () => {
       rollSize: '',
       hardness: '',
       color: '',
+      type: '',
+      pieces: 1,
       chemicalProperties: {
         C: '',
         MN: '',
@@ -584,16 +590,44 @@ const Index = () => {
                           onKeyDown={(e) => handleKeyDown(e, 7)}
                         />
                       </div>
-                      <div className='col-span-2'>
-                        <Label>Color</Label>
-                        <Input
-                          id="color"
-                          placeholder="Enter color"
-                          value={currentItem.color}
-                          onChange={(e) => handleCurrentItemChange('color', e.target.value)}
-                          ref={(el) => (inputRefs.current[8] = el)}
-                          onKeyDown={(e) => handleKeyDown(e, 8)}
-                        />
+                      <div className='col-span-2 flex gap-3'>
+                        <div className="flex-1">
+                          <Label>Color</Label>
+                          <Input
+                            id="color"
+                            placeholder="Enter color"
+                            value={currentItem.color}
+                            onChange={(e) => handleCurrentItemChange('color', e.target.value)}
+                            ref={(el) => (inputRefs.current[8] = el)}
+                            onKeyDown={(e) => handleKeyDown(e, 8)}
+                          />
+                        </div>
+                        <div className="flex-1">
+                          <Label>Type</Label>
+                          <Select
+                            value={currentItem.type}
+                            onValueChange={(value) => handleCurrentItemChange('type', value)}
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select type" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="reel">Reel</SelectItem>
+                              <SelectItem value="shaft">Shaft</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="flex-1">
+                          <Label>Pieces</Label>
+                          <Input
+                            type="number"
+                            id="pieces"
+                            min={1}
+                            placeholder="Enter number of pieces"
+                            value={currentItem.pieces}
+                            onChange={(e) => handleCurrentItemChange('pieces', Number(e.target.value))}
+                          />
+                        </div>
                       </div>
                       {/* Chemical Properties */}
                       <div className="space-y-3 mt-4 md:col-span-2">
@@ -655,7 +689,7 @@ const Index = () => {
                                   <div>
                                     <div className="text-sm font-medium text-slate-600 mb-1">Item {originalIndex + 1}</div>
                                     <div className="text-xs space-y-0.5 text-slate-500">
-                                      <div>Material: {item.material}</div>
+                                      <div>Material: {item.material}{item.type ? ` ${item.type}` : ''}</div>
                                       <div>Roll Number: {item.rollNo}</div>
                                       <div>Hardness: {item.hardness}</div>
                                       <div>Color: {item.color}</div>

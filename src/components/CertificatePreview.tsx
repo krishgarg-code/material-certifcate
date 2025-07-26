@@ -86,6 +86,7 @@ const CertificatePreview = ({ data }) => {
                   <th className="border border-black py-2">Roll No</th>
                   <th className="border border-black py-2">Roll Dimensions</th>
                   <th className="border border-black py-2">Grade</th>
+                  <th className="border border-black py-2">Pieces</th>
                   <th className="border border-black py-2">Hardness</th>
                   <th className="border border-black py-2">Colour Code</th>
                 </tr>
@@ -96,14 +97,15 @@ const CertificatePreview = ({ data }) => {
                     <td className="border border-black h-8 text-center">{index + 1}</td>
                     <td className="border border-black h-8 text-center">{item.rollNo || '-'}</td>
                     <td className="border border-black h-8 text-center">{item.rollSize || '-'}</td>
-                    <td className="border border-black h-8 text-center">{item.material || '-'}</td>
+                    <td className="border border-black h-8 text-center">{(item.material || item.type) ? `${item.material}${item.type ? ` ${item.type}` : ''}` : '-'}</td>
+                    <td className="border border-black h-8 text-center">{item.pieces || '-'}</td>
                     <td className="border border-black h-8 text-center">{item.hardness || '-'}</td>
                     <td className="border border-black h-8 text-center">{item.color || '-'}</td>
                   </tr>
                 ))}
                 {[...Array(Math.max(0, 6 - data.items.length))].map((_, index) => (
                   <tr key={`empty-${index}`}>
-                    {Array(6).fill(null).map((_, i) => (
+                    {Array(7).fill(null).map((_, i) => (
                       <td key={i} className="border border-black h-8">&nbsp;</td>
                     ))}
                   </tr>
