@@ -24,7 +24,7 @@ export const generatePDF = async (formData) => {
         return new Promise((resolve) => {
           let loadedImages = 0;
           const totalImages = images.length;
-          
+
           if (totalImages === 0) {
             resolve();
             return;
@@ -56,27 +56,31 @@ export const generatePDF = async (formData) => {
     });
 
     const imgData = canvas.toDataURL('image/png', 1.0);
-    
+
     // Create PDF with A4 dimensions
     const pdf = new jsPDF('p', 'mm', 'a4');
     const pdfWidth = pdf.internal.pageSize.getWidth();
     const pdfHeight = pdf.internal.pageSize.getHeight();
-    
-    // Calculate dimensions to fit the image properly
+
+    // Calculate dimensions to fit the image properly with a small margin
+    const margin = 0; // Margin in mm (set to 0 for full bleed or adjust if needed)
+    const availableWidth = pdfWidth - (margin * 2);
+    const availableHeight = pdfHeight - (margin * 2);
+
     const imgWidth = canvas.width;
     const imgHeight = canvas.height;
-    const ratio = Math.min(pdfWidth / imgWidth, pdfHeight / imgHeight);
-    
+    const ratio = Math.min(availableWidth / imgWidth, availableHeight / imgHeight);
+
     const imgX = (pdfWidth - imgWidth * ratio) / 2;
-    const imgY = 3; // Small margin from top
-    
+    const imgY = (pdfHeight - imgHeight * ratio) / 2;
+
     pdf.addImage(imgData, 'PNG', imgX, imgY, imgWidth * ratio, imgHeight * ratio);
-    
+
     // Generate filename from party name or use default
-    const filename = formData.partyName 
+    const filename = formData.partyName
       ? `Material_Certificate_${formData.partyName.replace(/[^a-zA-Z0-9]/g, '_')}.pdf`
       : 'Material_Certificate.pdf';
-    
+
     pdf.save(filename);
   } catch (error) {
     console.error('Error generating PDF:', error);
