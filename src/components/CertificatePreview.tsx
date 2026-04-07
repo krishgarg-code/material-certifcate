@@ -25,7 +25,7 @@ const CertificatePreview = ({ data }) => {
         <div className="border-4 border-black h-full p-4 flex flex-col justify-between m-2 mb-1 ml-2 relative">
           {/* Watermark Roll Image */}
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-            <img src={roll} alt="Roll" className="w-85 h-85 object-contain opacity-25" />
+            <img src={roll} alt="Roll" className="max-w-[85%] max-h-[85%] object-contain opacity-25" />
           </div>
 
           {/* Header */}
@@ -62,16 +62,18 @@ const CertificatePreview = ({ data }) => {
                 <div className="text-l">Invoice No : {data.invoiceNo || 'N/A'}</div>
                 <div className="text-l">P.O : {data.purchaseOrder}</div>
               </div>
-              <div className="space-y-1 text-right">
-                <div className="text-l">Date : {format(data.date, 'dd/MM/yy')}</div>
-                <div className="text-l">Date : {format(data.date, 'dd/MM/yy')}</div>
-                <div className="text-l text-right">
-                  Date: {Array.isArray(data.poDates) && data.poDates.length > 0
-                    ? data.poDates.map((d, i) => (
-                      <span key={i} className="inline-block">
-                        {format(d, 'dd/MM/yy')}{i < data.poDates.length - 1 ? ', ' : ''}
-                      </span>
-                    ))
+              <div className="space-y-1 flex flex-col text-right items-end">
+                <div className="text-l w-full text-right">Date : {data.date ? format(new Date(data.date), 'dd/MM/yy') : '-'}</div>
+                <div className="text-l w-full text-right">Date : {data.date ? format(new Date(data.date), 'dd/MM/yy') : '-'}</div>
+                <div className="text-l text-right break-words leading-snug w-full max-w-[250px]">
+                  P.O Date: {Array.isArray(data.poDates) && data.poDates.length > 0
+                    ? data.poDates.filter(Boolean).map((d, i, arr) => {
+                        try {
+                          return <span key={i} className="inline-block whitespace-nowrap">{format(new Date(d), 'dd/MM/yy')}{i < arr.length - 1 ? ', ' : ''}</span>
+                        } catch (e) {
+                          return null;
+                        }
+                      })
                     : '-'}
                 </div>
               </div>
@@ -79,7 +81,16 @@ const CertificatePreview = ({ data }) => {
           </div>
 
           {/* First Table */}
-          <table className="w-full border border-black border-collapse text-xs mb-10">
+          <table className="w-full border border-black border-collapse text-xs mb-10" style={{ tableLayout: 'fixed', width: '100%', minWidth: '750px' }}>
+            <colgroup>
+              <col style={{ width: '8%' }} />
+              <col style={{ width: '16%' }} />
+              <col style={{ width: '18%' }} />
+              <col style={{ width: '22%' }} />
+              <col style={{ width: '10%' }} />
+              <col style={{ width: '13%' }} />
+              <col style={{ width: '13%' }} />
+            </colgroup>
             <thead>
               <tr>
                 <th className="border border-black py-2">S.No</th>
@@ -114,7 +125,7 @@ const CertificatePreview = ({ data }) => {
           </table>
 
           {/* Second Table */}
-          <table className="w-full border border-black border-collapse text-xs mb-8">
+          <table className="w-full border border-black border-collapse text-xs mb-8" style={{ tableLayout: 'fixed', width: '100%', minWidth: '750px' }}>
             <colgroup>
               <col style={{ width: '10%' }} />
               {Array(12).fill(null).map((_, i) => (
