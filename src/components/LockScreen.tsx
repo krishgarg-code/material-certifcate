@@ -18,7 +18,7 @@ const LockScreen = () => {
     setTimeout(() => {
       if (username.toLowerCase() === 'cs castings' && password === '9855111991') {
         localStorage.setItem('isAuthenticated', 'true');
-        navigate('/main');
+        navigate('/');
         toast({
           title: "Access Granted",
           description: "Welcome back to MaterialCertify.",

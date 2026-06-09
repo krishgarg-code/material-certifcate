@@ -60,7 +60,7 @@ interface Item {
 }
 
 const Index = () => {
-  const inputRefs = useRef<any[]>([]);
+  const inputRefs = useRef<(HTMLElement | null)[]>([]);
   const [activeTab, setActiveTab] = useState("client");
 
   const generateTCNumber = () => {
@@ -77,6 +77,7 @@ const Index = () => {
     partyAddress: '',
     purchaseOrder: '',
     invoiceNo: '',
+    workOrder: '',
     tcNumber: generateTCNumber(),
     items: []
   });
@@ -111,12 +112,12 @@ const Index = () => {
 
   const chemicalElements = ['C', 'MN', 'SI', 'S', 'P', 'CR', 'NI', 'MO', 'V', 'MG', 'CU', 'TI'];
 
-  const handleInputChange = (field: string, value: any) => {
+  const handleInputChange = (field: string, value: string | Date | undefined) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  const handleKeyDown = (e: any, index: number, isLastSubmit = false) => {
-    const isTextarea = e.target.tagName === 'TEXTAREA';
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLElement>, index: number, isLastSubmit = false) => {
+    const isTextarea = (e.target as HTMLElement).tagName === 'TEXTAREA';
 
     if (e.key === 'Enter') {
       if (e.shiftKey && isTextarea) {
@@ -174,7 +175,7 @@ const Index = () => {
     setFormData(prev => ({ ...prev, poDates: prev.poDates.filter((_, i) => i !== index) }));
   };
 
-  const handleCurrentItemChange = (field: string, value: any) => {
+  const handleCurrentItemChange = (field: string, value: string | number) => {
     setCurrentItem(prev => ({ ...prev, [field]: value }));
   };
 
@@ -196,6 +197,15 @@ const Index = () => {
     if (!currentItem.material) {
       toast({ title: "Error", description: "Please select a material before adding", variant: "destructive" });
       setTimeout(() => { if (inputRefs.current[9]) inputRefs.current[9].focus() }, 10);
+      return;
+    }
+
+    if (editIndex === null && formData.items.length >= 7) {
+      toast({ 
+        title: "Limit Reached", 
+        description: "You can only add up to 7 materials, as the certificate table holds exactly 7 rows.", 
+        variant: "destructive" 
+      });
       return;
     }
 
@@ -235,6 +245,55 @@ const Index = () => {
     setShowPreview(true);
   };
 
+  const handlePrint = () => {
+    const previewEl = document.getElementById('certificate-preview');
+    if (!previewEl) return;
+
+    // Clone the node
+    const clone = previewEl.cloneNode(true) as HTMLElement;
+    clone.id = 'certificate-print-clone';
+    
+    // Add print styles dynamically
+    const styleEl = document.createElement('style');
+    styleEl.innerHTML = `
+      @media print {
+        body > * {
+          display: none !important;
+        }
+        body > #certificate-print-clone {
+          display: block !important;
+          position: absolute !important;
+          left: 0 !important;
+          top: 0 !important;
+          width: 210mm !important;
+          height: 297mm !important;
+          margin: 0 !important;
+          padding: 24px !important;
+          border: none !important;
+          box-shadow: none !important;
+          background: white !important;
+          -webkit-print-color-adjust: exact !important;
+          print-color-adjust: exact !important;
+          box-sizing: border-box !important;
+        }
+        @page {
+          size: A4 portrait;
+          margin: 0;
+        }
+      }
+    `;
+    
+    document.head.appendChild(styleEl);
+    document.body.appendChild(clone);
+    
+    // Trigger print dialog
+    window.print();
+    
+    // Clean up
+    document.body.removeChild(clone);
+    document.head.removeChild(styleEl);
+  };
+
   const handleDownloadPDF = async () => {
     setIsDownloading(true);
     try {
@@ -249,7 +308,7 @@ const Index = () => {
 
   const resetForm = () => {
     setFormData({
-      date: new Date(), poDates: [new Date()], partyName: '', partyAddress: '', purchaseOrder: '', invoiceNo: '', tcNumber: generateTCNumber(), items: []
+      date: new Date(), poDates: [new Date()], partyName: '', partyAddress: '', purchaseOrder: '', invoiceNo: '', workOrder: '', tcNumber: generateTCNumber(), items: []
     });
     resetCurrentItem();
     setActiveTab("client");
@@ -395,8 +454,12 @@ const Index = () => {
                 </div>
 
                 <div className="p-6 border-t-[2px] border-[#D9D1C6] flex justify-end gap-4 px-8 bg-[#F3EFE9]">
-                  <Button variant="ghost" onClick={() => setShowPreview(false)} className="rounded-none h-12 px-6 font-bold uppercase tracking-widest text-xs text-[#2B3519] hover:bg-transparent hover:underline hover:text-[#2B3519]">
-                    Back to Editor
+                  <Button 
+                    variant="ghost" 
+                    onClick={handlePrint} 
+                    className="rounded-none h-12 px-6 font-bold uppercase tracking-widest text-xs text-[#2B3519] hover:bg-transparent hover:underline hover:text-[#2B3519]"
+                  >
+                    Print Certificate
                   </Button>
                   <Button
                     onClick={handleDownloadPDF}
@@ -448,18 +511,7 @@ const Index = () => {
                             className="h-10 bg-transparent border-[1.5px] border-[#D9D1C6] rounded-none focus-visible:ring-0 focus-visible:border-[#2B3519] px-4 shadow-none text-base text-[#2B3519] placeholder:text-[#2B3519]/40"
                           />
                         </div>
-                        <div className="md:col-span-6 space-y-1">
-                          <Label className="text-[11px] font-black uppercase tracking-[0.05em] text-[#2B3519]" style={{ fontFamily: 'Inter, Arial, sans-serif' }}>Company Address</Label>
-                          <Textarea
-                            ref={(el) => inputRefs.current[1] = el}
-                            onKeyDown={(e) => handleKeyDown(e, 1)}
-                            placeholder="Full company address..."
-                            value={formData.partyAddress}
-                            onChange={(e) => handleInputChange('partyAddress', e.target.value)}
-                            className="min-h-[50px] h-16 bg-transparent border-[1.5px] border-[#D9D1C6] rounded-none focus-visible:ring-0 focus-visible:border-[#2B3519] px-4 py-2 shadow-none text-base text-[#2B3519] placeholder:text-[#2B3519]/40 resize-none"
-                          />
-                        </div>
-                        <div className="md:col-span-3 space-y-1">
+                        <div className="md:col-span-2 space-y-1">
                           <Label className="text-[11px] font-black uppercase tracking-[0.05em] text-[#2B3519]" style={{ fontFamily: 'Inter, Arial, sans-serif' }}>P.O. Number</Label>
                           <Input
                             ref={(el) => inputRefs.current[2] = el}
@@ -470,7 +522,7 @@ const Index = () => {
                             className="h-10 bg-transparent border-[1.5px] border-[#D9D1C6] rounded-none focus-visible:ring-0 focus-visible:border-[#2B3519] px-4 shadow-none text-base text-[#2B3519] placeholder:text-[#2B3519]/40"
                           />
                         </div>
-                        <div className="md:col-span-3 space-y-1">
+                        <div className="md:col-span-2 space-y-1">
                           <Label className="text-[11px] font-black uppercase tracking-[0.05em] text-[#2B3519]" style={{ fontFamily: 'Inter, Arial, sans-serif' }}>Invoice No.</Label>
                           <Input
                             ref={(el) => inputRefs.current[3] = el}
@@ -478,6 +530,17 @@ const Index = () => {
                             placeholder="e.g. INV-2024"
                             value={formData.invoiceNo}
                             onChange={(e) => handleInputChange('invoiceNo', e.target.value)}
+                            className="h-10 bg-transparent border-[1.5px] border-[#D9D1C6] rounded-none focus-visible:ring-0 focus-visible:border-[#2B3519] px-4 shadow-none text-base text-[#2B3519] placeholder:text-[#2B3519]/40"
+                          />
+                        </div>
+                        <div className="md:col-span-2 space-y-1">
+                          <Label className="text-[11px] font-black uppercase tracking-[0.05em] text-[#2B3519]" style={{ fontFamily: 'Inter, Arial, sans-serif' }}>Work Order</Label>
+                          <Input
+                            ref={(el) => inputRefs.current[4] = el}
+                            onKeyDown={(e) => handleKeyDown(e, 4)}
+                            placeholder="e.g. WO-9931"
+                            value={formData.workOrder}
+                            onChange={(e) => handleInputChange('workOrder', e.target.value)}
                             className="h-10 bg-transparent border-[1.5px] border-[#D9D1C6] rounded-none focus-visible:ring-0 focus-visible:border-[#2B3519] px-4 shadow-none text-base text-[#2B3519] placeholder:text-[#2B3519]/40"
                           />
                         </div>
@@ -490,13 +553,13 @@ const Index = () => {
                                 {formData.date ? format(formData.date, "PPP") : "Select date"}
                               </Button>
                             </PopoverTrigger>
-                            <PopoverContent className="w-auto p-0 border-[2px] border-[#2B3519] rounded-none shadow-none bg-[#F3EFE9]" align="start">
+                            <PopoverContent className="w-[280px] p-0 border-[2px] border-[#2B3519] rounded-none shadow-none bg-[#F3EFE9]" align="start">
                               <Calendar mode="single" selected={formData.date} onSelect={(d) => handleInputChange('date', d)} initialFocus />
                             </PopoverContent>
                           </Popover>
                         </div>
                         <div className="md:col-span-3 space-y-1">
-                          <Label className="text-[11px] font-black uppercase tracking-[0.05em] text-[#2B3519]" style={{ fontFamily: 'Inter, Arial, sans-serif' }}>T.C Number</Label>
+                          <Label className="text-[11px] font-black uppercase tracking-[0.05em] text-[#2B3519]" style={{ fontFamily: 'Inter, Arial, sans-serif' }}>Certificate Number</Label>
                           <div className="h-10 bg-[#EBE4DA] border-[1.5px] border-[#D9D1C6] rounded-none flex items-center px-4 text-[#2B3519] font-mono tracking-widest select-all text-base font-bold">
                             {formData.tcNumber}
                           </div>
@@ -520,7 +583,7 @@ const Index = () => {
                                     {date ? format(date, "MMM d, yyyy") : "Date"}
                                   </button>
                                 </PopoverTrigger>
-                                <PopoverContent className="w-auto p-0 border-[2px] border-[#2B3519] rounded-none shadow-none bg-[#F3EFE9]" align="start">
+                                <PopoverContent className="w-[280px] p-0 border-[2px] border-[#2B3519] rounded-none shadow-none bg-[#F3EFE9]" align="start">
                                   <Calendar mode="single" selected={date} onSelect={(d) => handlePoDateChange(idx, d)} initialFocus />
                                 </PopoverContent>
                               </Popover>
@@ -669,7 +732,12 @@ const Index = () => {
                             <div>
                               <p className="text-[12px] text-[#2B3519] font-black uppercase tracking-[0.1em]">Reviewing {formData.items.length} records</p>
                             </div>
-                            <Button variant="outline" onClick={() => setActiveTab("material")} className="h-10 rounded-none border-[1.5px] border-[#2B3519] text-[#2B3519] bg-transparent px-4 text-xs font-bold uppercase tracking-widest hover:bg-[#2B3519] hover:text-[#F3EFE9] transition-colors">
+                            <Button 
+                              variant="outline" 
+                              onClick={() => setActiveTab("material")} 
+                              disabled={formData.items.length >= 7}
+                              className="h-10 rounded-none border-[1.5px] border-[#2B3519] text-[#2B3519] bg-transparent px-4 text-xs font-bold uppercase tracking-widest hover:bg-[#2B3519] hover:text-[#F3EFE9] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
                               + Add Record
                             </Button>
                           </div>
